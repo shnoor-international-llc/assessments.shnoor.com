@@ -135,8 +135,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 font-sans p-0 overflow-hidden">
-      <div className="bg-white w-full max-w-[520px] min-h-[600px] max-h-[90vh] p-12 md:p-14 flex flex-col justify-center rounded-lg shadow-xl border border-slate-200 relative overflow-y-auto">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 font-sans p-4">
+      <div className="bg-white w-full max-w-[520px] min-h-[min(600px,90vh)] p-8 md:p-14 flex flex-col justify-center rounded-lg shadow-xl border border-slate-200 relative">
         <div className="text-center mb-10 flex-shrink-0">
           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.15em] mb-4">
             Secure Assessment Portal

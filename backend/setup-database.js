@@ -5,15 +5,39 @@ require('dotenv').config();
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
+    database: 'postgres', // Connect to default 'postgres' db first
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT || 5432,
 });
 
 const createTables = async () => {
-    const client = await pool.connect();
+    let client;
     try {
-        console.log('🔌 Connected to database...');
+        // 1. Create Database if not exists
+        client = await pool.connect();
+        const dbName = process.env.DB_NAME || 'exam_portal';
+
+        const res = await client.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [dbName]);
+        if (res.rowCount === 0) {
+            console.log(`Creating database '${dbName}'...`);
+            await client.query(`CREATE DATABASE "${dbName}"`);
+            console.log(`✅ Database '${dbName}' created.`);
+        } else {
+            console.log(`ℹ️ Database '${dbName}' already exists.`);
+        }
+        client.release();
+
+        // 2. Connect to the actual database
+        const dbPool = new Pool({
+            user: process.env.DB_USER,
+            host: process.env.DB_HOST,
+            database: dbName,
+            password: process.env.DB_PASSWORD,
+            port: process.env.DB_PORT || 5432,
+        });
+
+        client = await dbPool.connect();
+        console.log(`🔌 Connected to database '${dbName}'...`);
 
         // 1. Create Students Table
         console.log('Creating students table...');
@@ -70,10 +94,13 @@ const createTables = async () => {
         console.log('✅ Database setup completed successfully!');
 
     } catch (err) {
-        console.error('❌ Error creating tables:', err);
+        console.error('❌ Error setup database:', err);
     } finally {
-        client.release();
-        pool.end();
+        if (client) client.release();
+        await pool.end(); // Close initial connection
+        // Note: dbPool is local to the function scope in the previous chunk, so strictly we should handle it better, 
+        // but for a setup script, process exit is fine. 
+        process.exit();
     }
 };
 

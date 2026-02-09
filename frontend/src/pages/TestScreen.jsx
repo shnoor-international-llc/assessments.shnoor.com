@@ -242,7 +242,7 @@ const TestScreen = () => {
   const currentQ = questions[currentQuestion];
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gray-100 flex flex-col overflow-hidden">
       {/* Fullscreen Warning Modal */}
       {showWarning && (
         <FullscreenWarning onEnterFullscreen={enterFullscreen} />

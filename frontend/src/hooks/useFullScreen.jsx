@@ -35,15 +35,18 @@ export const useFullscreen = () => {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      const fullscreenElement = 
-        document.fullscreenElement || 
-        document.webkitFullscreenElement || 
+      const fullscreenElement =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
         document.msFullscreenElement;
-      
+
+
       setIsFullscreen(!!fullscreenElement);
-      
-      // Show warning if user exits fullscreen during test
-      if (!fullscreenElement && window.location.pathname === '/test') {
+
+      // Update warning state based on fullscreen status
+      if (fullscreenElement) {
+        setShowWarning(false);
+      } else if (window.location.pathname === '/test') {
         setShowWarning(true);
       }
     };
