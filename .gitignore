@@ -1,11 +1,13 @@
 # ============================================
-# Frontend .gitignore (React + Vite)
+# MCQ Exam Portal - Root .gitignore
 # ============================================
 
 # ============================================
 # Dependencies
 # ============================================
 node_modules/
+*/node_modules/
+**/node_modules/
 
 # ============================================
 # Environment Variables (CRITICAL - NEVER COMMIT!)
@@ -15,14 +17,18 @@ node_modules/
 .env.development
 .env.production
 .env.test
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
 
 # ============================================
-# Build Output
+# Firebase Credentials (CRITICAL - NEVER COMMIT!)
 # ============================================
-dist/
-dist-ssr/
-build/
-*.local
+serviceAccountKey.json
+firebase-credentials.json
+**/serviceAccountKey.json
+**/firebase-credentials.json
 
 # ============================================
 # Logs
@@ -36,33 +42,45 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # ============================================
+# Build Output
+# ============================================
+dist/
+dist-ssr/
+build/
+*.local
+
+# ============================================
 # OS Files
 # ============================================
 .DS_Store
 .DS_Store?
 ._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # ============================================
 # IDE / Editor
 # ============================================
-.vscode/*
-!.vscode/extensions.json
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.swp
-*.swo
-*~
 
 # ============================================
 # Testing
 # ============================================
 coverage/
 .nyc_output/
+*.test.js.snap
 
 # ============================================
 # Temporary Files
@@ -72,6 +90,27 @@ temp/
 *.tmp
 
 # ============================================
-# Vite
+# Package Manager
 # ============================================
-.vite/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============================================
+# Database Backups (if any)
+# ============================================
+*.sql.backup
+*.dump
+backups/
+
+# ============================================
+# Documentation (keep only README.md)
+# ============================================
+# Uncomment if you have temporary docs
+# docs/temp/
+# notes.md
+
+# ============================================
+# Git History Files
+# ============================================
+.history/

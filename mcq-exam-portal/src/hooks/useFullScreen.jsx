@@ -45,6 +45,9 @@ export const useFullscreen = () => {
       // Show warning if user exits fullscreen during test
       if (!fullscreenElement && window.location.pathname === '/test') {
         setShowWarning(true);
+      } else if (fullscreenElement) {
+        // Hide warning when entering fullscreen
+        setShowWarning(false);
       }
     };
 

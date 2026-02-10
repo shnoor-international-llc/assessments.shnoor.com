@@ -1,0 +1,21 @@
+question,optiona,optionb,optionc,optiond,correctoption
+What is the output of print(2 ** 3) in Python?,6,8,9,12,B
+Which data structure uses LIFO (Last In First Out)?,Queue,Stack,Array,Tree,B
+What does HTML stand for?,Hyper Text Markup Language,High Tech Modern Language,Home Tool Markup Language,Hyperlinks and Text Markup Language,A
+Which of the following is NOT a programming language?,Python,Java,HTML,C++,C
+What is the time complexity of binary search?,O(n),O(log n),O(n^2),O(1),B
+In object-oriented programming what does OOP stand for?,Object Oriented Programming,Only One Program,Optimal Operation Process,Organized Object Protocol,A
+Which symbol is used for single-line comments in JavaScript?,//,/* */,#,--,A
+What is the default port number for HTTP?,80,443,8080,3000,A
+Which SQL command is used to retrieve data from a database?,GET,FETCH,SELECT,RETRIEVE,C
+What does CSS stand for?,Computer Style Sheets,Cascading Style Sheets,Creative Style System,Colorful Style Sheets,B
+Which of the following is a NoSQL database?,MySQL,PostgreSQL,MongoDB,Oracle,C
+What is the purpose of the 'git clone' command?,To copy a repository,To create a new branch,To merge branches,To delete a repository,A
+In Python what keyword is used to define a function?,func,def,function,define,B
+Which HTTP method is used to update a resource?,GET,POST,PUT,DELETE,C
+What does API stand for?,Application Programming Interface,Advanced Programming Integration,Automated Program Interaction,Application Process Integration,A
+Which of the following is a JavaScript framework?,Django,Flask,React,Laravel,C
+What is the correct syntax to output 'Hello World' in Java?,echo 'Hello World';,print('Hello World'),System.out.println('Hello World');,console.log('Hello World'),C
+Which data type is used to store true/false values?,int,string,boolean,float,C
+What does SQL stand for?,Structured Query Language,Simple Question Language,Standard Query List,System Query Logic,A
+Which operator is used for exponentiation in Python?,^,**,pow(),exp(),B

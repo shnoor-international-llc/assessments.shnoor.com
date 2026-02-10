@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTimer } from '../hooks/useTimer';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { useTabSwitch } from '../hooks/useTabSwitch';
+import { useProctoringSimple } from '../hooks/useProctoringSimple';
 import FullscreenWarning from '../components/FullscreenWarning';
 import {
   Clock,
@@ -11,7 +12,6 @@ import {
   ChevronRight,
   Flag,
   CheckCircle,
-  Circle,
   Monitor
 } from 'lucide-react';
 
@@ -28,39 +28,163 @@ const TestScreen = () => {
   const [visited, setVisited] = useState(new Set([0]));
   const [warningCount, setWarningCount] = useState(0);
   const [showTabWarning, setShowTabWarning] = useState(false);
+  const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600); // Default 60 minutes in seconds
 
   const {
     isFullscreen,
     showWarning,
-    setShowWarning,
     enterFullscreen
   } = useFullscreen();
 
+  // Proctoring hook - only need start/stop functions
+  const {
+    startProctoring,
+    stopProctoring,
+  } = useProctoringSimple();
+
   // Handle auto-submit on time up
   const handleTimeUp = useCallback(() => {
-    submitTest('time_up');
+    // Will be called by submitTest
   }, []);
 
-  const { formattedTime, stopTimer } = useTimer(60, handleTimeUp);
+  const { timeLeft, formattedTime, stopTimer } = useTimer(
+    initialTimeRemaining, 
+    handleTimeUp
+  );
+
+  // Submit test function - defined early so it can be used by other callbacks
+  const submitTest = useCallback(async (reason = 'manual') => {
+    stopTimer();
+    
+    // IMPORTANT: Stop proctoring immediately when test ends
+    stopProctoring();
+
+    const testId = localStorage.getItem('selectedTestId');
+    const token = localStorage.getItem('studentAuthToken');
+
+    console.log('=== SUBMITTING TEST ===');
+    console.log('Test ID:', testId);
+    console.log('Answers:', answers);
+    console.log('Reason:', reason);
+    console.log('Proctoring stopped');
+
+    try {
+      // Submit to backend
+      const response = await fetch('/api/student/submit-exam', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          testId: testId,
+          answers: answers,
+          submissionReason: reason,
+          warningCount: warningCount,
+          timeRemaining: timeLeft
+        })
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.success) {
+        // Clear test-specific data
+        localStorage.removeItem('selectedTestId');
+
+        // Navigate to results with backend response
+        navigate('/result', {
+          state: {
+            result: data.result,
+            submissionReason: reason
+          }
+        });
+      } else {
+        alert('Failed to submit exam: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error submitting exam:', error);
+      alert('Error submitting exam. Please try again.');
+    }
+  }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring]);
+
+  // Update handleTimeUp to use submitTest
+  useEffect(() => {
+    if (timeLeft === 0) {
+      submitTest('time_up');
+    }
+  }, [timeLeft, submitTest]);
 
   // Handle tab switch
   const handleTabSwitch = useCallback((count, max) => {
     setWarningCount(count);
     setShowTabWarning(true);
 
-    // Alert user
-    // Alert user
-    alert(`[WARNING] ${count}/${max}\n\nDo not switch tabs during the examination!\n\n${count >= max ? 'This was your final warning. Your test will be submitted automatically.' : 'Please return to the test immediately.'}`);
-
     if (count >= max) {
-      submitTest('tab_switch_violation');
+      // Final warning - auto submit
+      alert(`[FINAL WARNING] ${count}/${max}\n\nYou have exceeded the maximum number of tab switches!\n\nYour test will be submitted automatically now.`);
+      
+      // Auto-submit the test immediately
+      setTimeout(() => {
+        submitTest('tab_switch_violation');
+      }, 100);
+    } else {
+      // Regular warning
+      alert(`[WARNING] ${count}/${max}\n\nDo not switch tabs during the examination!\n\nPlease return to the test immediately.`);
+      
+      // Hide warning modal after 3 seconds
+      setTimeout(() => setShowTabWarning(false), 3000);
     }
+  }, [submitTest]);
 
-    // Hide warning modal after 3 seconds
-    setTimeout(() => setShowTabWarning(false), 3000);
-  }, []);
+  useTabSwitch(handleTabSwitch, 3);
 
-  const { resetWarnings } = useTabSwitch(handleTabSwitch, 3);
+  // Manual save function - only called when user clicks Save & Next or Skip
+  const saveProgressNow = useCallback(async () => {
+    const token = localStorage.getItem('studentAuthToken');
+    const testId = localStorage.getItem('selectedTestId');
+
+    if (!token || !testId || questions.length === 0) return;
+
+    try {
+      const payload = {
+        testId: parseInt(testId),
+        answers: answers,
+        currentQuestion: currentQuestion,
+        markedForReview: Array.from(markedForReview),
+        visitedQuestions: Array.from(visited),
+        timeRemaining: timeLeft,
+        warningCount: warningCount
+      };
+      
+      console.log('💾 Saving progress manually');
+      
+      const response = await fetch('/api/student/save-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        console.log('✅ Progress saved');
+        return true;
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to save progress:', errorData);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      return false;
+    }
+  }, [answers, currentQuestion, markedForReview, visited, timeLeft, warningCount, questions.length]);
+
+  // NO AUTO-SAVE - Removed debounced auto-save
+  // Progress only saves when user clicks Save & Next or Skip buttons
 
   // Security: Prevent copy-paste and right click
   useEffect(() => {
@@ -99,7 +223,7 @@ const TestScreen = () => {
       }
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/student/test/${testId}`, {
+        const response = await fetch(`/api/student/test/${testId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -112,6 +236,57 @@ const TestScreen = () => {
         const data = await response.json();
         if (data.success && data.test && data.test.questions) {
           setQuestions(data.test.questions);
+          
+          // Get test duration from backend
+          const duration = data.test.duration || 60;
+          
+          // Load saved progress if available
+          if (data.savedProgress) {
+            console.log('Loading saved progress:', data.savedProgress);
+            setAnswers(data.savedProgress.answers || {});
+            setCurrentQuestion(data.savedProgress.currentQuestion || 0);
+            setMarkedForReview(new Set(data.savedProgress.markedForReview || []));
+            setVisited(new Set(data.savedProgress.visitedQuestions || [0]));
+            setWarningCount(data.savedProgress.warningCount || 0);
+            
+            // Set time remaining from saved progress (in seconds)
+            if (data.savedProgress.timeRemaining) {
+              setInitialTimeRemaining(data.savedProgress.timeRemaining);
+            } else {
+              setInitialTimeRemaining(duration * 60); // Convert minutes to seconds
+            }
+          } else {
+            // No saved progress, use full duration
+            setInitialTimeRemaining(duration * 60);
+          }
+
+          // Initialize proctoring with proper error handling
+          // Get student data from localStorage (stored as separate items)
+          const studentId = localStorage.getItem('studentId') || 'unknown';
+          const studentName = localStorage.getItem('studentName') || 'Student';
+          
+          console.log('[Proctoring] Student ID:', studentId);
+          console.log('[Proctoring] Student Name:', studentName);
+          console.log('[Proctoring] Starting proctoring for:', studentName);
+          
+          try {
+            const proctoringResult = await startProctoring({
+              studentId: studentId,
+              studentName: studentName,
+              testId: testId,
+              testTitle: data.test.title,
+            });
+            
+            if (proctoringResult.success) {
+              console.log('[Proctoring] Successfully started');
+            } else {
+              console.error('[Proctoring] Failed to start:', proctoringResult.error);
+              // Don't block test if proctoring fails, just log it
+            }
+          } catch (proctoringErr) {
+            console.error('[Proctoring] Error starting proctoring:', proctoringErr);
+            // Don't block test if proctoring fails
+          }
         } else {
           throw new Error('Invalid test data');
         }
@@ -127,8 +302,19 @@ const TestScreen = () => {
     const handleBeforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = '';
+      // Stop proctoring when browser is closing
+      stopProctoring();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Handle visibility change (tab switch, minimize, etc.)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('[Proctoring] Page hidden - stopping proctoring');
+        stopProctoring();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     fetchData();
 
@@ -139,42 +325,21 @@ const TestScreen = () => {
       document.removeEventListener('paste', preventAction);
       document.removeEventListener('keydown', preventKeys);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      // Stop proctoring when leaving test
+      stopProctoring();
     };
-  }, [navigate]);
-
-  const submitTest = useCallback((reason = 'manual') => {
-    stopTimer();
-
-    const finalSubmission = {
-      testId: localStorage.getItem('selectedTestId'),
-      studentId: localStorage.getItem('studentId'),
-      answers: answers,
-      submittedAt: new Date().toISOString(),
-      reason: reason,
-      warningCount: warningCount,
-      timeRemaining: formattedTime
-    };
-
-    // console.log('=== TEST SUBMISSION ===', finalSubmission);
-
-    // Clear test-specific data
-    localStorage.removeItem('selectedTestId');
-
-    // Navigate to results
-    navigate('/result', {
-      state: {
-        submission: finalSubmission,
-        totalQuestions: questions.length,
-        attempted: Object.keys(answers).length
-      }
-    });
-  }, [answers, warningCount, formattedTime, stopTimer, navigate]);
+  }, [navigate]); // REMOVED stopProctoring from dependencies to prevent infinite loop
 
   const handleAnswerSelect = (optionIndex) => {
-    setAnswers(prev => ({
-      ...prev,
-      [currentQuestion]: optionIndex
-    }));
+    setAnswers(prev => {
+      const newAnswers = {
+        ...prev,
+        [currentQuestion]: optionIndex
+      };
+      return newAnswers;
+    });
   };
 
   const handleNavigate = (index) => {
@@ -287,17 +452,7 @@ const TestScreen = () => {
                 </span>
               </div>
 
-              {/* Submit Button */}
-              <button
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to submit the test? This action cannot be undone.')) {
-                    submitTest('manual');
-                  }
-                }}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-sm"
-              >
-                Submit Test
-              </button>
+              {/* Timer and Info - Submit button removed, now floating at bottom-right */}
             </div>
           </div>
         </div>
@@ -450,8 +605,9 @@ const TestScreen = () => {
 
               <div className="flex space-x-3">
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     handleAnswerSelect(undefined);
+                    await saveProgressNow(); // Save before skipping
                     handleNext();
                   }}
                   className="px-6 py-3 border-2 border-gray-300 text-gray-600 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-colors"
@@ -460,8 +616,9 @@ const TestScreen = () => {
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (answers[currentQuestion] !== undefined) {
+                      await saveProgressNow(); // Save before moving to next
                       handleNext();
                     } else {
                       alert('Please select an answer or click Skip');
@@ -477,6 +634,19 @@ const TestScreen = () => {
           </div>
         </main>
       </div>
+
+      {/* Floating Finish Test Button - Bottom Right */}
+      <button
+        onClick={() => {
+          if (window.confirm('Are you sure you want to finish and submit the test? This action cannot be undone.')) {
+            submitTest('manual');
+          }
+        }}
+        className="fixed bottom-4 right-4 z-40 flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-2xl transition-all hover:scale-105 border-2 border-red-700"
+      >
+        <CheckCircle size={20} />
+        <span>Finish Test</span>
+      </button>
     </div>
   );
 };

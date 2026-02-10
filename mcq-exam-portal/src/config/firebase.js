@@ -8,13 +8,13 @@ import {
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCYVg8jfW_ZXZ_t5hxB83fWEKfj6AWmjbg",
-    authDomain: "mcq-portal-c7478.firebaseapp.com",
-    projectId: "mcq-portal-c7478",
-    storageBucket: "mcq-portal-c7478.firebasestorage.app",
-    messagingSenderId: "288409860357",
-    appId: "1:288409860357:web:5a8df69a49ee8999729f6c",
-    measurementId: "G-N1MR6R4RQM"
+    apiKey: "AIzaSyDyURfwNaIbNCMvjvOlr_lja9cf7NVPYSY",
+    authDomain: "assignment-portal-556d9.firebaseapp.com",
+    projectId: "assignment-portal-556d9",
+    storageBucket: "assignment-portal-556d9.firebasestorage.app",
+    messagingSenderId: "979956221332",
+    appId: "1:979956221332:web:acce0ec4dc6e9303293b81",
+    measurementId: "G-89PBEQFMKG"
 };
 
 // Initialize Firebase

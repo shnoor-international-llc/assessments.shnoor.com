@@ -25,10 +25,19 @@ router.post('/questions', verifyAdmin, upload.single('file'), async (req, res) =
             return res.status(400).json({ success: false, message: 'No file uploaded' });
         }
 
-        const { testName, testDescription } = req.body;
+        const { testName, testDescription, duration, maxAttempts, passingPercentage, startDateTime, endDateTime, status } = req.body;
         if (!testName) {
             return res.status(400).json({ success: false, message: 'Test Name is required' });
         }
+
+        console.log('=== BULK UPLOAD REQUEST ===');
+        console.log('Test Name:', testName);
+        console.log('Duration:', duration, 'Type:', typeof duration);
+        console.log('Max Attempts:', maxAttempts, 'Type:', typeof maxAttempts);
+        console.log('Passing Percentage:', passingPercentage, 'Type:', typeof passingPercentage);
+        console.log('Start DateTime:', startDateTime);
+        console.log('End DateTime:', endDateTime);
+        console.log('Status:', status);
 
         let data = [];
 
@@ -69,10 +78,34 @@ router.post('/questions', verifyAdmin, upload.single('file'), async (req, res) =
         // Start Transaction
         await client.query('BEGIN');
 
-        // 1. Create Test
+        // Check for duplicate test name
+        const duplicateCheck = await client.query(
+            'SELECT id FROM tests WHERE LOWER(title) = LOWER($1)',
+            [testName]
+        );
+        
+        if (duplicateCheck.rows.length > 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ 
+                success: false, 
+                message: `A test with the name "${testName}" already exists. Please use a different name.` 
+            });
+        }
+
+        // 1. Create Test with additional details
         const testResult = await client.query(
-            'INSERT INTO tests (title, description) VALUES ($1, $2) RETURNING id',
-            [testName, testDescription || '']
+            `INSERT INTO tests (title, description, duration, max_attempts, passing_percentage, start_datetime, end_datetime, status) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            [
+                testName, 
+                testDescription || '', 
+                parseInt(duration) || 60,
+                parseInt(maxAttempts) || 1,
+                parseInt(passingPercentage) || 50,
+                startDateTime || null,
+                endDateTime || null,
+                status || 'draft'
+            ]
         );
         const testId = testResult.rows[0].id;
 
@@ -133,6 +166,234 @@ router.post('/questions', verifyAdmin, upload.single('file'), async (req, res) =
         res.status(500).json({
             success: false,
             message: 'Upload failed',
+            error: error.message
+        });
+    } finally {
+        client.release();
+    }
+});
+
+/**
+ * POST /api/admin/upload/question
+ * Add a single question to a test
+ * Body: { testId, questionText, optionA, optionB, optionC, optionD, correctOption, marks }
+ */
+router.post('/question', verifyAdmin, async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const {
+            testId,
+            testName,
+            testDescription,
+            questionText,
+            optionA,
+            optionB,
+            optionC,
+            optionD,
+            correctOption,
+            marks
+        } = req.body;
+
+        // Validation
+        if (!questionText || !optionA || !optionB || !correctOption) {
+            return res.status(400).json({
+                success: false,
+                message: 'Question text, Option A, Option B, and Correct Option are required'
+            });
+        }
+
+        // Validate correct option is A, B, C, or D
+        const cleanCorrectOption = correctOption.toString().toUpperCase().trim();
+        if (!['A', 'B', 'C', 'D'].includes(cleanCorrectOption)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Correct option must be A, B, C, or D'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        let finalTestId = testId;
+
+        // If no testId provided, create a new test
+        if (!finalTestId) {
+            if (!testName) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({
+                    success: false,
+                    message: 'Either testId or testName is required'
+                });
+            }
+
+            // Check for duplicate test name
+            const duplicateCheck = await client.query(
+                'SELECT id FROM tests WHERE LOWER(title) = LOWER($1)',
+                [testName]
+            );
+            
+            if (duplicateCheck.rows.length > 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `A test with the name "${testName}" already exists. Please use a different name.` 
+                });
+            }
+
+            const testResult = await client.query(
+                'INSERT INTO tests (title, description) VALUES ($1, $2) RETURNING id',
+                [testName, testDescription || '']
+            );
+            finalTestId = testResult.rows[0].id;
+        } else {
+            // Verify test exists
+            const testCheck = await client.query('SELECT id FROM tests WHERE id = $1', [finalTestId]);
+            if (testCheck.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(404).json({
+                    success: false,
+                    message: 'Test not found'
+                });
+            }
+        }
+
+        // Insert the question
+        const result = await client.query(
+            `INSERT INTO questions 
+            (test_id, question_text, option_a, option_b, option_c, option_d, correct_option, marks) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+            RETURNING id`,
+            [
+                finalTestId,
+                questionText,
+                optionA,
+                optionB,
+                optionC || '',
+                optionD || '',
+                cleanCorrectOption,
+                marks || 1
+            ]
+        );
+
+        await client.query('COMMIT');
+
+        res.status(201).json({
+            success: true,
+            message: 'Question added successfully',
+            questionId: result.rows[0].id,
+            testId: finalTestId
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Single Question Upload Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add question',
+            error: error.message
+        });
+    } finally {
+        client.release();
+    }
+});
+
+/**
+ * POST /api/upload/manual
+ * Create a test with manually entered questions
+ * Body: { testName, testDescription, questions: [{question, optiona, optionb, optionc, optiond, correctoption, marks}] }
+ */
+router.post('/manual', verifyAdmin, async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { testName, testDescription, duration, maxAttempts, passingPercentage, startDateTime, endDateTime, status, questions } = req.body;
+
+        console.log('=== MANUAL UPLOAD REQUEST ===');
+        console.log('Test Name:', testName);
+        console.log('Duration:', duration, 'Type:', typeof duration);
+        console.log('Max Attempts:', maxAttempts, 'Type:', typeof maxAttempts);
+        console.log('Passing Percentage:', passingPercentage, 'Type:', typeof passingPercentage);
+        console.log('Start DateTime:', startDateTime);
+        console.log('End DateTime:', endDateTime);
+        console.log('Status:', status);
+        console.log('Questions count:', questions?.length);
+
+        if (!testName || !questions || questions.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Test name and at least one question are required' 
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Check for duplicate test name
+        const duplicateCheck = await client.query(
+            'SELECT id FROM tests WHERE LOWER(title) = LOWER($1)',
+            [testName]
+        );
+        
+        if (duplicateCheck.rows.length > 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ 
+                success: false, 
+                message: `A test with the name "${testName}" already exists. Please use a different name.` 
+            });
+        }
+
+        // Create test with additional details
+        const testResult = await client.query(
+            `INSERT INTO tests (title, description, duration, max_attempts, passing_percentage, start_datetime, end_datetime, status) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            [
+                testName, 
+                testDescription || '', 
+                parseInt(duration) || 60,
+                parseInt(maxAttempts) || 1,
+                parseInt(passingPercentage) || 50,
+                startDateTime || null,
+                endDateTime || null,
+                status || 'draft'
+            ]
+        );
+        const testId = testResult.rows[0].id;
+
+        // Insert questions
+        let insertedCount = 0;
+        for (const q of questions) {
+            if (q.question && q.optiona && q.optionb && q.correctoption) {
+                await client.query(
+                    `INSERT INTO questions 
+                    (test_id, question_text, option_a, option_b, option_c, option_d, correct_option, marks) 
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                    [
+                        testId,
+                        q.question,
+                        q.optiona,
+                        q.optionb,
+                        q.optionc || '',
+                        q.optiond || '',
+                        q.correctoption.toString().toUpperCase(),
+                        q.marks || 1
+                    ]
+                );
+                insertedCount++;
+            }
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `Successfully created test "${testName}" with ${insertedCount} questions.`,
+            testId: testId,
+            questionsCount: insertedCount
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Manual Upload Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create test',
             error: error.message
         });
     } finally {

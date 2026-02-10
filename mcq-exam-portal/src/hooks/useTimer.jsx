@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export const useTimer = (initialMinutes, onTimeUp) => {
-  const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
+export const useTimer = (initialSeconds, onTimeUp) => {
+  const [timeLeft, setTimeLeft] = useState(initialSeconds);
   const [isActive, setIsActive] = useState(true);
+
+  // Update timeLeft when initialSeconds changes
+  useEffect(() => {
+    setTimeLeft(initialSeconds);
+  }, [initialSeconds]);
 
   const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);

@@ -8,6 +8,7 @@ import Result from './pages/Results';
 import Feedback from './pages/Feedback';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
+import LiveProctoring from './pages/admin/LiveProctoring';
 
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
@@ -46,6 +47,7 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/live-proctoring" element={<AdminRoute><LiveProctoring /></AdminRoute>} />
 
         {/* Default */}
         <Route path="/" element={<Navigate to="/login" replace />} />

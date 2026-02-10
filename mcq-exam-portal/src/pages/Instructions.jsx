@@ -6,6 +6,7 @@ const Instructions = () => {
   const navigate = useNavigate();
   const [hasRead, setHasRead] = useState(false);
   const [testDetails, setTestDetails] = useState(null);
+  const [hasProgress, setHasProgress] = useState(false);
 
   useEffect(() => {
     const testId = localStorage.getItem('selectedTestId');
@@ -21,34 +22,104 @@ const Instructions = () => {
       return;
     }
 
-    // Mock test details based on ID
-    const testInfo = {
-      'test-001': { title: 'Java Programming Mock Test', duration: 60 },
-      'test-002': { title: 'Aptitude Assessment', duration: 45 },
-      'test-003': { title: 'Database Management Systems', duration: 90 },
-      'test-004': { title: 'Logical Reasoning', duration: 30 }
+    // Fetch test details and check for saved progress
+    const fetchTestData = async () => {
+      try {
+        const response = await fetch(`/api/student/test/${testId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Test data received:', data);
+          if (data.success) {
+            // Set test details from backend
+            setTestDetails({
+              title: data.test.title,
+              duration: data.test.duration || 60,
+              totalQuestions: data.test.questions.length
+            });
+
+            // Check if progress exists
+            if (data.savedProgress) {
+              setHasProgress(true);
+              console.log('Saved progress found:', data.savedProgress);
+            }
+          }
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'Failed to load test details');
+          navigate('/dashboard');
+        }
+      } catch (err) {
+        console.error('Error fetching test data:', err);
+        alert('Failed to load test. Please try again.');
+        navigate('/dashboard');
+      }
     };
 
-    setTestDetails(testInfo[testId] || { title: 'Assessment Test', duration: 60 });
+    fetchTestData();
   }, [navigate]);
 
   const handleStartExam = async () => {
+    const testId = localStorage.getItem('selectedTestId');
+    const token = localStorage.getItem('studentAuthToken');
+
     try {
-      const element = document.documentElement;
-      if (element.requestFullscreen) {
-        await element.requestFullscreen();
-      } else if (element.webkitRequestFullscreen) {
-        await element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        await element.msRequestFullscreen();
+      // Only create initial progress if no progress exists (first time starting)
+      if (!hasProgress) {
+        console.log('Creating initial progress...');
+        const progressResponse = await fetch('/api/student/save-progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            testId: parseInt(testId),
+            answers: {},
+            currentQuestion: 0,
+            markedForReview: [],
+            visitedQuestions: [0],
+            timeRemaining: (testDetails?.duration || 60) * 60, // Convert minutes to seconds
+            warningCount: 0
+          })
+        });
+
+        if (!progressResponse.ok) {
+          const errorData = await progressResponse.json();
+          console.error('Failed to save progress:', errorData);
+          throw new Error('Failed to start exam');
+        }
+
+        const progressData = await progressResponse.json();
+        console.log('Progress saved:', progressData);
+      } else {
+        console.log('Resuming existing progress...');
       }
-    } catch (err) {
-      console.error('Fullscreen request failed:', err);
-      alert('Fullscreen mode is required to start the examination.');
-      return;
+
+      // Request fullscreen
+      try {
+        const element = document.documentElement;
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          await element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+          await element.msRequestFullscreen();
+        }
+      } catch (err) {
+        console.error('Fullscreen request failed:', err);
+        // Don't block navigation if fullscreen fails
+      }
+      
+      navigate('/test');
+    } catch (error) {
+      console.error('Error starting exam:', error);
+      alert('Failed to start exam. Please try again.');
     }
-    
-    navigate('/test');
   };
 
   const rules = [
@@ -90,6 +161,12 @@ const Instructions = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Examination Instructions</h1>
               <p className="text-lg text-gray-600">{testDetails.title}</p>
+              {hasProgress && (
+                <div className="mt-3 flex items-center space-x-2 text-green-700 bg-green-50 px-4 py-2 rounded-lg inline-flex">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-semibold">You have saved progress for this test</span>
+                </div>
+              )}
             </div>
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
               <Shield className="w-8 h-8 text-blue-600" />
@@ -98,10 +175,10 @@ const Instructions = () => {
           <div className="flex items-center space-x-4 text-sm text-gray-500">
             <span className="flex items-center">
               <Clock className="w-4 h-4 mr-1" />
-              Duration: {testDetails.duration} Minutes
+              Duration: {testDetails?.duration || 60} Minutes
             </span>
             <span>•</span>
-            <span>Total Questions: 20</span>
+            <span>Total Questions: {testDetails?.totalQuestions || 0}</span>
             <span>•</span>
             <span>Full Screen Required</span>
           </div>
@@ -175,11 +252,17 @@ const Instructions = () => {
               className={`
                 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200
                 ${hasRead 
-                  ? 'bg-blue-900 hover:bg-blue-800 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5' 
+                  ? hasProgress
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                    : 'bg-blue-900 hover:bg-blue-800 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
               `}
             >
-              {hasRead ? 'Start Examination →' : 'Please Read Instructions First'}
+              {hasRead 
+                ? hasProgress 
+                  ? '▶ Resume Examination →' 
+                  : 'Start Examination →'
+                : 'Please Read Instructions First'}
             </button>
           </div>
         </div>
