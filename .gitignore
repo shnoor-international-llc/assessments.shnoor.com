@@ -106,9 +106,23 @@ backups/
 # ============================================
 # Documentation (keep only README.md)
 # ============================================
-# Uncomment if you have temporary docs
-# docs/temp/
-# notes.md
+# All setup and optimization documentation
+SCALING_SETUP.md
+PHASE2_SETUP.md
+OPTIMIZATION_COMPLETE.md
+INTEGRATION_STATUS.md
+SETUP_SUCCESS.md
+WHATS_NEW.md
+QUICK_REFERENCE.md
+DEPLOYMENT_CHECKLIST.md
+ARCHITECTURE.md
+FINAL_SUMMARY.md
+INTEGRATION_CHECKLIST.md
+SETUP_COMPLETE.md
+INSTALLATION_STEPS.md
+CRITICAL_CHANGES_SUMMARY.md
+README_SCALING.md
+COMPONENT_INTEGRATION_MAP.md
 
 # ============================================
 # Git History Files

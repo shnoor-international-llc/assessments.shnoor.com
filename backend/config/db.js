@@ -8,10 +8,13 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT || 5432,
-  // Connection pool settings
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // How long to wait for a connection
+  // Connection pool settings - Optimized for 300+ concurrent users
+  max: parseInt(process.env.DB_POOL_MAX) || 100, // Maximum number of clients in the pool
+  min: 10, // Minimum number of clients to keep in the pool
+  idleTimeoutMillis: 60000, // How long a client is allowed to remain idle before being closed (60s)
+  connectionTimeoutMillis: 5000, // How long to wait for a connection (5s)
+  maxUses: 7500, // Close connections after 7500 uses to prevent memory leaks
+  allowExitOnIdle: false, // Keep pool alive even when idle
 });
 
 // Test database connection

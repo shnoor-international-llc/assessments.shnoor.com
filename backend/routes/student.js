@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
+// const { cache } = require('../config/redis'); // DISABLED: Redis
+// const { cacheMiddleware } = require('../middleware/cache'); // DISABLED: Redis
 const verifyToken = require('../middleware/verifyToken');
 
 /**

@@ -110,28 +110,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F9FAFB]">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-[#111827] shadow-sm border-b-4 border-[#3B82F6] sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#3B82F6] to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">EX</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Assessment Portal</h1>
-                <p className="text-sm text-gray-500">Student Dashboard</p>
+                <h1 className="text-xl font-bold text-white">Assessment Portal</h1>
+                <p className="text-sm text-gray-300">Student Dashboard</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-6">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">Welcome, {studentName}</p>
-                <p className="text-xs text-gray-500">{capitalizeInstitute(institute)} • ID: {studentId}</p>              </div>
+                <p className="text-sm font-medium text-white">Welcome, {studentName}</p>
+                <p className="text-xs text-gray-300">{capitalizeInstitute(institute)} • ID: {studentId}</p>              </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200"
+                className="flex items-center space-x-2 px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-lg"
               >
                 <LogOut size={18} />
                 <span className="font-medium">Logout</span>
@@ -144,27 +144,27 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Examinations</h2>
-          <p className="text-gray-600">Select a test to begin your assessment</p>
+          <h2 className="text-2xl font-bold text-[#111827] mb-2">Available Examinations</h2>
+          <p className="text-[#374151]">Select a test to begin your assessment</p>
         </div>
 
         {loading && (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3B82F6]"></div>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
         {!loading && !error && availableTests.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-12 bg-white rounded-xl border-2 border-[#E5E7EB] shadow-sm">
             <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900">No Tests Available</h3>
-            <p className="text-gray-500 mt-2">You have completed all available tests or there are no new assessments at this time.</p>
+            <h3 className="text-lg font-medium text-[#111827]">No Tests Available</h3>
+            <p className="text-[#374151] mt-2">You have completed all available tests or there are no new assessments at this time.</p>
           </div>
         )}
 
@@ -172,8 +172,8 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {availableTests.map((test) => {
               // Determine card styling based on test status
-              let cardBgColor = test.color; // Default: blue (available)
-              let cardBorderColor = 'border-blue-200';
+              let cardBgColor = 'bg-white'; // Default: white (available)
+              let cardBorderColor = 'border-[#3B82F6]';
               let cardOpacity = 'opacity-100';
               
               if (test.testStatus === 'expired' || test.alreadyTaken) {
@@ -182,13 +182,13 @@ const Dashboard = () => {
                 cardOpacity = 'opacity-75';
               } else if (test.testStatus === 'upcoming') {
                 cardBgColor = 'bg-orange-50';
-                cardBorderColor = 'border-orange-200';
+                cardBorderColor = 'border-orange-300';
               }
               
               return (
               <div
                 key={test.id}
-                className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${test.isAvailable && !test.alreadyTaken ? 'hover:shadow-lg' : ''} transition-all duration-200`}
+                className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${test.isAvailable && !test.alreadyTaken ? 'hover:shadow-lg hover:border-[#3B82F6]' : ''} transition-all duration-200`}
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -197,11 +197,11 @@ const Dashboard = () => {
                         ? 'bg-gray-300 text-gray-700' 
                         : test.testStatus === 'upcoming'
                         ? 'bg-orange-200 text-orange-800'
-                        : 'bg-white/80 text-gray-700'
+                        : 'bg-blue-100 text-[#3B82F6]'
                     } rounded-full text-xs font-semibold mb-2`}>
                       {test.subject}
                     </span>
-                    <h3 className="text-lg font-bold text-gray-900">{test.title}</h3>
+                    <h3 className="text-lg font-bold text-[#111827]">{test.title}</h3>
                     {test.alreadyTaken && (
                       <span className="inline-block mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
                         All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
@@ -223,30 +223,30 @@ const Dashboard = () => {
                       </span>
                     )}
                   </div>
-                  <BookOpen className={test.alreadyTaken || !test.isAvailable ? 'text-gray-400' : test.testStatus === 'upcoming' ? 'text-orange-400' : 'text-blue-400'} size={24} />
+                  <BookOpen className={test.alreadyTaken || !test.isAvailable ? 'text-gray-400' : test.testStatus === 'upcoming' ? 'text-orange-400' : 'text-[#3B82F6]'} size={24} />
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <div className="flex items-center text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-[#374151]">
                     <Clock size={16} className="mr-2" />
                     <span>Duration: {test.duration} minutes</span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-[#374151]">
                     <AlertCircle size={16} className="mr-2" />
                     <span>{test.questions} Questions • {test.difficulty} Level</span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-[#374151]">
                     <BookOpen size={16} className="mr-2" />
                     <span>Attempts: {test.attemptsTaken}/{test.maxAttempts} ({test.attemptsRemaining} remaining)</span>
                   </div>
                   {test.startDateTime && (
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-[#374151]">
                       <Clock size={16} className="mr-2" />
                       <span>Available from: {new Date(test.startDateTime).toLocaleString()}</span>
                     </div>
                   )}
                   {test.endDateTime && (
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-[#374151]">
                       <Clock size={16} className="mr-2" />
                       <span>Available until: {new Date(test.endDateTime).toLocaleString()}</span>
                     </div>
@@ -265,7 +265,7 @@ const Dashboard = () => {
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                       : testsWithProgress.has(test.id)
                       ? 'bg-green-600 hover:bg-green-700 text-white'
-                      : 'bg-blue-900 hover:bg-blue-800 text-white'
+                      : 'bg-[#3B82F6] hover:bg-blue-600 text-white'
                   }`}
                 >
                   {test.alreadyTaken 
@@ -285,9 +285,9 @@ const Dashboard = () => {
         )}
 
         {/* Info Section */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Important Instructions</h3>
-          <ul className="space-y-2 text-sm text-blue-800">
+        <div className="mt-12 bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-[#111827] mb-2">Important Instructions</h3>
+          <ul className="space-y-2 text-sm text-[#374151]">
             <li className="flex items-start">
               <span className="mr-2">•</span>
               Ensure you have a stable internet connection before starting

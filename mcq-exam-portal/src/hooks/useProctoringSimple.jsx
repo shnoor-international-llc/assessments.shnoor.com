@@ -5,7 +5,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const FRAME_RATE = 5; // 5 frames per second
 const FRAME_INTERVAL = 1000 / FRAME_RATE; // 200ms
 
-export const useProctoringSimple = () => {
+export const useProctoringSimple = (onCameraLost) => {
   const [stream, setStream] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
@@ -16,6 +16,7 @@ export const useProctoringSimple = () => {
   const canvasRef = useRef(null);
   const frameIntervalRef = useRef(null);
   const studentDataRef = useRef(null);
+  const cameraCheckIntervalRef = useRef(null);
 
   // Request camera and microphone permissions
   const requestPermissions = async () => {
@@ -180,6 +181,18 @@ export const useProctoringSimple = () => {
       startFrameCapture(mediaStream, socket, studentData);
       console.log('[Proctoring] Step 6: Proctoring active');
       
+      // Monitor camera status - check every 2 seconds
+      cameraCheckIntervalRef.current = setInterval(() => {
+        const tracks = mediaStream.getVideoTracks();
+        if (tracks.length === 0 || !tracks[0].enabled || tracks[0].readyState === 'ended') {
+          console.error('[Proctoring] Camera lost or disabled!');
+          if (onCameraLost) {
+            onCameraLost('Camera was disabled or disconnected. Exam terminated.');
+          }
+          stopProctoring();
+        }
+      }, 2000);
+      
       return { success: true };
     } catch (err) {
       console.error('[Proctoring] Start error:', err);
@@ -191,6 +204,12 @@ export const useProctoringSimple = () => {
   // Stop proctoring
   const stopProctoring = useCallback(() => {
     console.log('[Proctoring] Stopping proctoring...');
+    
+    // Stop camera check interval
+    if (cameraCheckIntervalRef.current) {
+      clearInterval(cameraCheckIntervalRef.current);
+      cameraCheckIntervalRef.current = null;
+    }
     
     // Stop frame capture
     if (frameIntervalRef.current) {

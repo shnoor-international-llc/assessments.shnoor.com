@@ -68,6 +68,27 @@ const Instructions = () => {
     const token = localStorage.getItem('studentAuthToken');
 
     try {
+      // CRITICAL: Request camera permission BEFORE starting/resuming exam
+      console.log('Requesting camera permission...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
+        
+        // Stop the stream immediately - we just needed to check permission
+        stream.getTracks().forEach(track => track.stop());
+        console.log('Camera permission granted');
+      } catch (cameraError) {
+        console.error('Camera permission denied:', cameraError);
+        alert('⚠️ Camera Access Required\n\nYou must allow camera access to take this exam.\n\nPlease:\n1. Click the camera icon in your browser address bar\n2. Allow camera access\n3. Refresh the page and try again');
+        return; // Block exam from starting
+      }
+
       // Only create initial progress if no progress exists (first time starting)
       if (!hasProgress) {
         console.log('Creating initial progress...');
@@ -97,7 +118,7 @@ const Instructions = () => {
         const progressData = await progressResponse.json();
         console.log('Progress saved:', progressData);
       } else {
-        console.log('Resuming existing progress...');
+        console.log('Resuming existing progress with camera permission verified...');
       }
 
       // Request fullscreen

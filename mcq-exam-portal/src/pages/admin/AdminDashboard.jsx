@@ -273,9 +273,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const exportToPDF = () => {
-    window.print();
-  };
+
 
   // Fetch Institutes
   const fetchInstitutes = async () => {
@@ -422,34 +420,34 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F9FAFB]">
       {/* Header */}
-      <header className="bg-slate-900 text-white shadow-lg">
+      <header className="bg-[#111827] text-white shadow-2xl border-b-4 border-[#3B82F6]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                <span className="font-bold text-xl">A</span>
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-blue-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+                <span className="font-bold text-2xl text-white">A</span>
               </div>
               <div>
-                <h1 className="font-bold text-lg">Admin Dashboard</h1>
-                <p className="text-xs text-gray-400">MCQ Management System</p>
+                <h1 className="font-bold text-xl text-white">Admin Dashboard</h1>
+                <p className="text-sm text-gray-300">MCQ Management System</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => navigate('/admin/live-proctoring')}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-5 py-2.5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
-                <Video size={18} />
-                <span>Live Proctoring</span>
+                <Video size={20} />
+                <span className="font-medium">Live Proctoring</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                className="flex items-center space-x-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <LogOut size={18} />
-                <span>Logout</span>
+                <LogOut size={20} />
+                <span className="font-medium">Logout</span>
               </button>
             </div>
           </div>
@@ -460,8 +458,8 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab Navigation */}
         {!showCreateTest && !selectedExamId && (
-          <div className="mb-6 border-b border-gray-200">
-            <div className="flex space-x-8">
+          <div className="mb-8">
+            <div className="bg-white rounded-2xl shadow-lg border-2 border-[#E5E7EB] p-2 inline-flex space-x-2">
               {[
                 { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
                 { id: 'assign', label: 'Assign Tests', icon: UserCheck },
@@ -469,13 +467,13 @@ const AdminDashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-3 border-b-2 transition-colors ${
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'border-slate-900 text-slate-900 font-semibold'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-[#3B82F6] text-white shadow-lg transform scale-105'
+                      : 'text-[#374151] hover:text-[#111827] hover:bg-[#F9FAFB]'
                   }`}
                 >
-                  <tab.icon size={18} />
+                  <tab.icon size={20} />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -485,35 +483,38 @@ const AdminDashboard = () => {
 
         {/* Create Test Modal/Section */}
         {showCreateTest ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-[#E5E7EB] p-8 mb-6">
+            <div className="flex items-center justify-between mb-8">
               <button
                 onClick={() => setShowCreateTest(false)}
-                className="flex items-center text-gray-600 hover:text-slate-900 transition-colors"
+                className="flex items-center text-[#374151] hover:text-[#3B82F6] transition-colors group"
               >
-                <ArrowLeft size={20} className="mr-2" />
-                Back to Exams
+                <ArrowLeft size={22} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+                <span className="font-medium">Back to Exams</span>
               </button>
             </div>
             <CreateTestSection onComplete={handleCreateTestComplete} />
           </div>
         ) : selectedExamId ? (
           /* Detail View: Student Results for a specific exam */
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-[#E5E7EB] overflow-hidden">
+            <div className="p-8">
               <button
                 onClick={() => setSelectedExamId(null)}
-                className="flex items-center text-gray-600 hover:text-slate-900 mb-6 transition-colors"
+                className="flex items-center text-[#374151] hover:text-[#3B82F6] mb-8 transition-colors group"
               >
-                <ArrowLeft size={20} className="mr-2" />
-                Back to Exams List
+                <ArrowLeft size={22} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+                <span className="font-medium">Back to Exams List</span>
               </button>
 
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">{selectedExamDetails?.name}</h2>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span>{selectedExamDetails?.questions} Questions</span>
+                  <h2 className="text-3xl font-bold text-[#111827] mb-2">{selectedExamDetails?.name}</h2>
+                  <div className="flex items-center space-x-4 text-sm text-[#374151]">
+                    <span className="flex items-center">
+                      <FileSpreadsheet size={16} className="mr-1" />
+                      {selectedExamDetails?.questions} Questions
+                    </span>
                     <span>•</span>
                     <span>Created on {selectedExamDetails?.date}</span>
                   </div>
@@ -522,63 +523,50 @@ const AdminDashboard = () => {
                   <button
                     onClick={exportToExcel}
                     disabled={selectedExamStudents.length === 0}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-2 px-5 py-3 rounded-xl font-medium transition-all shadow-lg ${
                       selectedExamStudents.length === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-green-600 hover:bg-green-700 text-white'
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#3B82F6] hover:bg-blue-600 text-white hover:shadow-xl transform hover:-translate-y-0.5'
                     }`}
                     title={selectedExamStudents.length === 0 ? 'No results to export' : 'Export to Excel'}
                   >
-                    <FileSpreadsheet size={18} />
-                    <span>Export Excel</span>
-                  </button>
-                  <button
-                    onClick={exportToPDF}
-                    disabled={selectedExamStudents.length === 0}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                      selectedExamStudents.length === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-red-600 hover:bg-red-700 text-white'
-                    }`}
-                    title={selectedExamStudents.length === 0 ? 'No results to export' : 'Export to PDF'}
-                  >
-                    <Download size={18} />
-                    <span>Export PDF</span>
+                    <FileSpreadsheet size={20} />
+                    <span>Export to Excel</span>
                   </button>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-xl border-2 border-[#E5E7EB] shadow-lg">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-[#111827] text-white">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Attempted</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student ID</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student Name</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Date Attempted</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Score</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-[#E5E7EB]">
                     {selectedExamStudents.length > 0 ? (
                       selectedExamStudents.map((student, idx) => {
                         const percentage = (student.score / student.total * 100);
                         const passingPercentage = student.passingPercentage || 50;
                         const isPassed = percentage >= passingPercentage;
                         return (
-                          <tr key={idx} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{student.id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.email || 'N/A'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.date}</td>
+                          <tr key={idx} className="hover:bg-[#F9FAFB]">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#111827]">{student.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#111827]">{student.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{student.email || 'N/A'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#374151]">{student.date}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <span className={`font-bold ${isPassed ? 'text-green-600' : 'text-red-600'}`}>
                                   {student.score}
                                 </span>
-                                <span className="text-gray-400 text-xs ml-1">/ {student.total}</span>
-                                <span className="text-gray-500 text-xs ml-2">({percentage.toFixed(1)}%)</span>
+                                <span className="text-[#374151] text-xs ml-1">/ {student.total}</span>
+                                <span className="text-[#374151] text-xs ml-2">({percentage.toFixed(1)}%)</span>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -595,7 +583,7 @@ const AdminDashboard = () => {
                       })
                     ) : (
                       <tr>
-                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                        <td colSpan="6" className="px-6 py-12 text-center text-[#374151]">
                           No students have attempted this exam yet.
                         </td>
                       </tr>
@@ -609,19 +597,19 @@ const AdminDashboard = () => {
           /* List View: All Exams */
           <>
             {activeTab === 'exams' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border-2 border-[#E5E7EB] overflow-hidden">
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                        <FileSpreadsheet className="mr-2" size={28} />
+                      <h2 className="text-2xl font-bold text-[#111827] flex items-center">
+                        <FileSpreadsheet className="mr-2 text-[#3B82F6]" size={28} />
                         Exams
                       </h2>
-                      <p className="text-sm text-gray-500 mt-1">Manage all your exams and view results</p>
+                      <p className="text-sm text-[#374151] mt-1">Manage all your exams and view results</p>
                     </div>
                     <button
                       onClick={() => setShowCreateTest(true)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-colors shadow-sm"
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-lg transition-colors shadow-sm font-semibold"
                     >
                       <Plus size={20} />
                       <span>Create Test</span>
@@ -630,11 +618,11 @@ const AdminDashboard = () => {
 
                   {loading ? (
                     <div className="flex justify-center items-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
-                      <span className="ml-3 text-gray-600">Loading exams...</span>
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3B82F6]"></div>
+                      <span className="ml-3 text-[#374151]">Loading exams...</span>
                     </div>
                   ) : tests.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-[#374151]">
                       <FileSpreadsheet className="mx-auto mb-3 text-gray-300" size={48} />
                       <p className="font-medium">No exams found</p>
                       <p className="text-sm mt-1">Click "Create Test" to add your first exam</p>
@@ -644,7 +632,7 @@ const AdminDashboard = () => {
                       {tests.map((test) => (
                         <div
                           key={test.id}
-                          className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-slate-300 transition-all group relative"
+                          className="bg-white border-2 border-[#E5E7EB] rounded-xl p-6 hover:shadow-lg hover:border-[#3B82F6] transition-all group relative"
                         >
                           {/* Status Badge */}
                           <div className="absolute top-4 right-4">
@@ -667,46 +655,46 @@ const AdminDashboard = () => {
 
                           {/* Header with Icon */}
                           <div className="flex justify-between items-start mb-4">
-                            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold text-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center text-[#3B82F6] font-bold text-xl group-hover:bg-[#3B82F6] group-hover:text-white transition-colors">
                               {test.name.charAt(0)}
                             </div>
                           </div>
 
                           {/* Exam Title */}
-                          <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                          <h3 className="font-bold text-[#111827] text-lg mb-2 line-clamp-2 group-hover:text-[#3B82F6] transition-colors">
                             {test.name}
                           </h3>
 
                           {/* Exam Details */}
                           <div className="space-y-2 mb-4">
-                            <div className="flex items-center text-sm text-gray-600">
-                              <FileSpreadsheet size={16} className="mr-2 text-gray-400" />
+                            <div className="flex items-center text-sm text-[#374151]">
+                              <FileSpreadsheet size={16} className="mr-2" />
                               <span>{test.questions} Questions • {test.duration} mins</span>
                             </div>
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-[#374151]">
                               <span className="text-xs">Created: {test.date}</span>
                             </div>
                           </div>
 
                           {/* Stats */}
-                          <div className="flex items-center justify-center pt-4 border-t border-gray-100 mb-4">
+                          <div className="flex items-center justify-center pt-4 border-t border-[#E5E7EB] mb-4">
                             <div className="text-center">
                               <div className="flex items-center justify-center mb-1">
-                                <Users size={16} className="text-gray-400 mr-1" />
-                                <span className="text-lg font-bold text-gray-900">{test.attempts}</span>
+                                <Users size={16} className="text-[#374151] mr-1" />
+                                <span className="text-lg font-bold text-[#111827]">{test.attempts}</span>
                               </div>
-                              <p className="text-xs text-gray-500">Attempted</p>
+                              <p className="text-xs text-[#374151]">Attempted</p>
                             </div>
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex items-center space-x-2 pt-4 border-t border-gray-100">
+                          <div className="flex items-center space-x-2 pt-4 border-t border-[#E5E7EB]">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedExamId(test.id);
                               }}
-                              className="flex-1 py-2 px-3 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-medium transition-colors"
+                              className="flex-1 py-2 px-3 bg-blue-100 text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white rounded-lg text-sm font-medium transition-colors"
                               title="View Results"
                             >
                               <Eye size={18} className="inline mr-1" />
@@ -733,26 +721,30 @@ const AdminDashboard = () => {
 
             {activeTab === 'assign' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                    <UserCheck className="mr-2" size={20} />
-                    Assign Tests to Students
-                  </h2>
+                <div className="bg-white rounded-2xl shadow-2xl border-2 border-[#E5E7EB] p-8">
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-bold text-[#111827] mb-2 flex items-center">
+                      <UserCheck className="mr-3 text-[#3B82F6]" size={32} />
+                      Assign Tests to Students
+                    </h2>
+                    <p className="text-[#374151] ml-11">Select a test and choose students to assign it to</p>
+                  </div>
 
                   {/* Test Selection */}
-                  <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <div className="mb-8 p-6 bg-[#F9FAFB] rounded-2xl border-2 border-[#E5E7EB] shadow-lg">
+                    <label className="block text-sm font-bold text-[#111827] mb-3 flex items-center">
+                      <FileSpreadsheet size={18} className="mr-2 text-[#3B82F6]" />
                       Select Test to Assign
                     </label>
                     <select
                       value={selectedTest}
                       onChange={(e) => setSelectedTest(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      className="w-full px-5 py-4 border-2 border-[#E5E7EB] rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-[#3B82F6] bg-white text-[#111827] font-medium shadow-sm hover:border-[#3B82F6] transition-all cursor-pointer"
                     >
                       <option value="">-- Choose a test --</option>
                       {tests.map((test) => (
                         <option key={test.id} value={test.id}>
-                          {test.name} ({test.questions} questions)
+                          {test.name} ({test.questions} questions • {test.duration} mins)
                         </option>
                       ))}
                     </select>
@@ -760,29 +752,56 @@ const AdminDashboard = () => {
 
                   {/* Selected Students Counter */}
                   {selectedStudents.length > 0 && (
-                    <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm font-semibold text-green-900">
-                        {selectedStudents.length} student(s) selected
-                      </p>
+                    <div className="mb-6 p-5 bg-blue-50 rounded-2xl border-2 border-blue-200 shadow-lg transform hover:scale-[1.02] transition-transform">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-[#3B82F6] rounded-xl flex items-center justify-center shadow-lg">
+                            <Users size={24} className="text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-[#111827]">
+                              {selectedStudents.length} student{selectedStudents.length !== 1 ? 's' : ''} selected
+                            </p>
+                            <p className="text-xs text-[#374151]">Ready to assign test</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedStudents([])}
+                          className="px-4 py-2 bg-white hover:bg-blue-100 text-[#3B82F6] rounded-lg text-sm font-medium transition-colors shadow-sm border border-[#E5E7EB]"
+                        >
+                          Clear Selection
+                        </button>
+                      </div>
                     </div>
                   )}
 
                   {/* Institutes and Students */}
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-gray-900 mb-3">Select Students by Institute</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold text-[#111827] flex items-center">
+                        <Users size={22} className="mr-2 text-[#3B82F6]" />
+                        Select Students by Institute
+                      </h3>
+                      {institutes.length > 0 && (
+                        <span className="text-sm text-[#374151] bg-[#F9FAFB] px-3 py-1 rounded-full border border-[#E5E7EB]">
+                          {institutes.length} institute{institutes.length !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
 
                     {isLoadingInstitutes ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-                        <span className="ml-3 text-gray-600">Loading institutes...</span>
+                      <div className="flex items-center justify-center py-12 bg-[#F9FAFB] rounded-2xl border-2 border-[#E5E7EB]">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-[#3B82F6]"></div>
+                        <span className="ml-3 text-[#374151] font-medium">Loading institutes...</span>
                       </div>
                     ) : institutes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Users className="mx-auto mb-3 text-gray-300" size={48} />
-                        <p>No students registered yet</p>
+                      <div className="text-center py-16 bg-[#F9FAFB] rounded-2xl border-2 border-[#E5E7EB]">
+                        <Users className="mx-auto mb-4 text-gray-300" size={64} />
+                        <p className="text-[#111827] font-medium text-lg">No students registered yet</p>
+                        <p className="text-[#374151] text-sm mt-2">Students will appear here once they register</p>
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {institutes.map((institute) => {
                           const isExpanded = expandedInstitutes[institute.institute];
                           const students = instituteStudents[institute.institute] || [];
@@ -790,24 +809,30 @@ const AdminDashboard = () => {
                           const someSelected = students.some(s => selectedStudents.includes(s.id));
 
                           return (
-                            <div key={institute.institute} className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div 
+                              key={institute.institute} 
+                              className="border-2 border-[#E5E7EB] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all bg-white"
+                            >
                               {/* Institute Header */}
-                              <div className="bg-gray-50 p-4 flex items-center justify-between">
-                                <div className="flex items-center space-x-3 flex-1">
+                              <div className="bg-[#F9FAFB] p-5 flex items-center justify-between border-b-2 border-[#E5E7EB]">
+                                <div className="flex items-center space-x-4 flex-1">
                                   <button
                                     onClick={() => toggleInstitute(institute.institute)}
-                                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                                    className="w-10 h-10 flex items-center justify-center bg-white hover:bg-blue-50 text-[#374151] hover:text-[#3B82F6] rounded-xl transition-all shadow-sm hover:shadow-md transform hover:scale-105 border border-[#E5E7EB]"
                                   >
-                                    {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                                    {isExpanded ? <ChevronDown size={22} /> : <ChevronRight size={22} />}
                                   </button>
                                   <div className="flex-1">
-                                    <h4 className="font-semibold text-gray-900">
+                                    <h4 className="font-bold text-lg text-[#111827]">
                                       {capitalizeInstitute(institute.institute)}
                                     </h4>
-                                    <p className="text-sm text-gray-500">{institute.student_count} students</p>
+                                    <p className="text-sm text-[#374151] flex items-center mt-1">
+                                      <Users size={14} className="mr-1" />
+                                      {institute.student_count} student{institute.student_count !== 1 ? 's' : ''}
+                                    </p>
                                   </div>
                                   {students.length > 0 && (
-                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                    <label className="flex items-center space-x-3 cursor-pointer px-4 py-2 bg-white hover:bg-blue-50 rounded-xl transition-colors shadow-sm border-2 border-[#E5E7EB] hover:border-[#3B82F6]">
                                       <input
                                         type="checkbox"
                                         checked={allSelected}
@@ -815,9 +840,9 @@ const AdminDashboard = () => {
                                           if (el) el.indeterminate = someSelected && !allSelected;
                                         }}
                                         onChange={() => toggleAllStudents(institute.institute, students)}
-                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                        className="w-5 h-5 text-[#3B82F6] border-[#E5E7EB] rounded-md focus:ring-2 focus:ring-[#3B82F6]"
                                       />
-                                      <span className="text-sm font-medium text-gray-700">Select All</span>
+                                      <span className="text-sm font-bold text-[#111827]">Select All</span>
                                     </label>
                                   )}
                                 </div>
@@ -825,30 +850,45 @@ const AdminDashboard = () => {
 
                               {/* Students List */}
                               {isExpanded && (
-                                <div className="p-4 bg-white">
+                                <div className="p-5 bg-white">
                                   {students.length === 0 ? (
-                                    <p className="text-sm text-gray-500 italic">Loading students...</p>
+                                    <div className="flex items-center justify-center py-8">
+                                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#3B82F6] mr-3"></div>
+                                      <p className="text-sm text-[#374151] font-medium">Loading students...</p>
+                                    </div>
                                   ) : (
-                                    <div className="space-y-2">
-                                      {students.map((student) => (
-                                        <label
-                                          key={student.id}
-                                          className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                                        >
-                                          <input
-                                            type="checkbox"
-                                            checked={selectedStudents.includes(student.id)}
-                                            onChange={() => toggleStudent(student.id)}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                                          />
-                                          <div className="flex-1">
-                                            <p className="font-medium text-gray-900">{student.full_name}</p>
-                                            <p className="text-sm text-gray-500">
-                                              {student.roll_number} • {student.email}
-                                            </p>
-                                          </div>
-                                        </label>
-                                      ))}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {students.map((student) => {
+                                        const isSelected = selectedStudents.includes(student.id);
+                                        return (
+                                          <label
+                                            key={student.id}
+                                            className={`flex items-center space-x-3 p-4 rounded-xl cursor-pointer transition-all border-2 ${
+                                              isSelected
+                                                ? 'bg-blue-50 border-[#3B82F6] shadow-md'
+                                                : 'bg-white hover:bg-[#F9FAFB] border-[#E5E7EB] hover:border-[#3B82F6]/50 shadow-sm hover:shadow-md'
+                                            }`}
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              checked={isSelected}
+                                              onChange={() => toggleStudent(student.id)}
+                                              className="w-5 h-5 text-[#3B82F6] border-[#E5E7EB] rounded-md focus:ring-2 focus:ring-[#3B82F6]"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                              <p className={`font-bold truncate ${isSelected ? 'text-[#3B82F6]' : 'text-[#111827]'}`}>
+                                                {student.full_name}
+                                              </p>
+                                              <p className={`text-xs truncate ${isSelected ? 'text-blue-600' : 'text-[#374151]'}`}>
+                                                {student.roll_number} • {student.email}
+                                              </p>
+                                            </div>
+                                            {isSelected && (
+                                              <CheckCircle size={20} className="text-[#3B82F6] flex-shrink-0" />
+                                            )}
+                                          </label>
+                                        );
+                                      })}
                                     </div>
                                   )}
                                 </div>
@@ -861,24 +901,26 @@ const AdminDashboard = () => {
                   </div>
 
                   {/* Assign Button */}
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-8 flex justify-end">
                     <button
                       onClick={handleAssignTest}
                       disabled={!selectedTest || selectedStudents.length === 0 || isAssigning}
-                      className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center space-x-2 ${
+                      className={`px-8 py-4 rounded-xl font-bold transition-all flex items-center space-x-3 text-lg shadow-lg ${
                         selectedTest && selectedStudents.length > 0 && !isAssigning
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          ? 'bg-[#3B82F6] hover:bg-blue-600 text-white hover:shadow-2xl transform hover:-translate-y-1'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-[#E5E7EB]'
                       }`}
                     >
                       {isAssigning && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                       )}
-                      <UserCheck size={18} />
+                      <UserCheck size={22} />
                       <span>
                         {isAssigning 
-                          ? 'Assigning...' 
-                          : `Assign Test to ${selectedStudents.length} Student(s)`
+                          ? 'Assigning Test...' 
+                          : selectedStudents.length > 0
+                            ? `Assign Test to ${selectedStudents.length} Student${selectedStudents.length !== 1 ? 's' : ''}`
+                            : 'Assign Test'
                         }
                       </span>
                     </button>

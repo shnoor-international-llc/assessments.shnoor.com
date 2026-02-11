@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
+// const { cache } = require('../config/redis'); // DISABLED: Redis
+// const { cacheMiddleware } = require('../middleware/cache'); // DISABLED: Redis
 const verifyAdmin = require('../middleware/verifyAdmin');
 
 /**
@@ -100,6 +102,9 @@ router.put('/:id/status', verifyAdmin, async (req, res) => {
             });
         }
 
+        // Invalidate cache
+        // await cache.delPattern('cache:*'); // DISABLED: Redis
+
         res.json({
             success: true,
             message: `Test status updated to ${status}`,
@@ -176,6 +181,9 @@ router.delete('/:id', verifyAdmin, async (req, res) => {
         
         await client.query('COMMIT');
         console.log(`[DELETE TEST] Successfully deleted test ID: ${id}`);
+
+        // Invalidate cache
+        // await cache.delPattern('cache:*'); // DISABLED: Redis
 
         res.json({
             success: true,
@@ -314,6 +322,9 @@ router.post('/assign', verifyAdmin, async (req, res) => {
 
         await Promise.all(insertPromises);
         await client.query('COMMIT');
+
+        // Invalidate cache
+        // await cache.delPattern('cache:*'); // DISABLED: Redis
 
         res.json({
             success: true,

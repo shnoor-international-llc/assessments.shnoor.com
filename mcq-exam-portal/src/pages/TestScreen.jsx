@@ -36,12 +36,6 @@ const TestScreen = () => {
     enterFullscreen
   } = useFullscreen();
 
-  // Proctoring hook - only need start/stop functions
-  const {
-    startProctoring,
-    stopProctoring,
-  } = useProctoringSimple();
-
   // Handle auto-submit on time up
   const handleTimeUp = useCallback(() => {
     // Will be called by submitTest
@@ -51,6 +45,30 @@ const TestScreen = () => {
     initialTimeRemaining, 
     handleTimeUp
   );
+
+  // Handle camera loss - force exit exam
+  const handleCameraLost = useCallback((reason) => {
+    alert(`⚠️ ${reason}\n\nYour exam has been terminated.`);
+    stopTimer();
+    
+    // Clear test data
+    localStorage.removeItem('selectedTestId');
+    
+    // Navigate back to dashboard
+    navigate('/dashboard', { 
+      replace: true,
+      state: { 
+        message: 'Exam terminated due to camera issue',
+        type: 'error'
+      }
+    });
+  }, [navigate, stopTimer]);
+
+  // Proctoring hook - pass camera loss handler
+  const {
+    startProctoring,
+    stopProctoring,
+  } = useProctoringSimple(handleCameraLost);
 
   // Submit test function - defined early so it can be used by other callbacks
   const submitTest = useCallback(async (reason = 'manual') => {
@@ -307,6 +325,29 @@ const TestScreen = () => {
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
 
+    // Block browser back button during exam
+    const blockBackButton = (e) => {
+      e.preventDefault();
+      window.history.pushState(null, '', window.location.href);
+      
+      // Confirm if user really wants to exit
+      const confirmExit = window.confirm(
+        '⚠️ Warning: Going back will exit the exam!\n\n' +
+        'Your progress will be saved, but you will need to resume the exam.\n\n' +
+        'Are you sure you want to exit?'
+      );
+      
+      if (confirmExit) {
+        // Stop proctoring and save progress before exiting
+        stopProctoring();
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    
+    // Push initial state and listen for popstate
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', blockBackButton);
+
     // Handle visibility change (tab switch, minimize, etc.)
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -325,12 +366,13 @@ const TestScreen = () => {
       document.removeEventListener('paste', preventAction);
       document.removeEventListener('keydown', preventKeys);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', blockBackButton);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       
       // Stop proctoring when leaving test
       stopProctoring();
     };
-  }, [navigate]); // REMOVED stopProctoring from dependencies to prevent infinite loop
+  }, [navigate, stopProctoring]);
 
   const handleAnswerSelect = (optionIndex) => {
     setAnswers(prev => {
